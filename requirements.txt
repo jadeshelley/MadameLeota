@@ -1,0 +1,23 @@
+# Core AI/ML
+torch
+transformers
+sentence-transformers
+
+# Video/Image Processing
+opencv-python
+numpy
+Pillow
+
+# Audio Processing
+PyAudio
+SpeechRecognition
+pyttsx3
+gTTS
+
+# GUI/Display
+pygame
+
+# System/Utilities
+psutil
+python-dotenv
+requests
