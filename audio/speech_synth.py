@@ -30,7 +30,7 @@ class SpeechSynthesizer:
         self.logger = logging.getLogger(__name__)
         self.engine = None
         self.audio_config = config.get_audio_config()
-        self.is_speaking = False
+        self._speaking = False
         self.speech_thread = None
         
         if PYTTSX3_AVAILABLE:
@@ -102,21 +102,21 @@ class SpeechSynthesizer:
         """Speak using pyttsx3"""
         try:
             if blocking:
-                self.is_speaking = True
+                self._speaking = True
                 self.engine.say(text)
                 self.engine.runAndWait()
-                self.is_speaking = False
+                self._speaking = False
                 return True
             else:
                 # Non-blocking speech
-                self.is_speaking = True
+                self._speaking = True
                 
                 def speak_thread():
                     try:
                         self.engine.say(text)
                         self.engine.runAndWait()
                     finally:
-                        self.is_speaking = False
+                        self._speaking = False
                 
                 self.speech_thread = threading.Thread(target=speak_thread, daemon=True)
                 self.speech_thread.start()
@@ -124,7 +124,7 @@ class SpeechSynthesizer:
                 
         except Exception as e:
             self.logger.error(f"pyttsx3 speech error: {e}")
-            self.is_speaking = False
+            self._speaking = False
             return False
     
     def _speak_gtts(self, text: str, blocking: bool) -> bool:
@@ -143,14 +143,14 @@ class SpeechSynthesizer:
             
             # Play audio
             if blocking:
-                self.is_speaking = True
+                self._speaking = True
                 pygame.mixer.music.load(temp_path)
                 pygame.mixer.music.play()
                 
                 while pygame.mixer.music.get_busy():
                     time.sleep(0.1)
                 
-                self.is_speaking = False
+                self._speaking = False
                 
                 # Clean up
                 pygame.mixer.music.unload()
@@ -158,7 +158,7 @@ class SpeechSynthesizer:
                 return True
             else:
                 # Non-blocking speech
-                self.is_speaking = True
+                self._speaking = True
                 
                 def play_thread():
                     try:
@@ -172,7 +172,7 @@ class SpeechSynthesizer:
                         pygame.mixer.music.unload()
                         os.unlink(temp_path)
                     finally:
-                        self.is_speaking = False
+                        self._speaking = False
                 
                 self.speech_thread = threading.Thread(target=play_thread, daemon=True)
                 self.speech_thread.start()
@@ -180,7 +180,7 @@ class SpeechSynthesizer:
                 
         except Exception as e:
             self.logger.error(f"gTTS speech error: {e}")
-            self.is_speaking = False
+            self._speaking = False
             return False
     
     def stop_speech(self):
@@ -191,7 +191,7 @@ class SpeechSynthesizer:
             elif GTTS_AVAILABLE:
                 pygame.mixer.music.stop()
             
-            self.is_speaking = False
+            self._speaking = False
             
             if self.speech_thread and self.speech_thread.is_alive():
                 self.speech_thread.join(timeout=1)
@@ -227,7 +227,7 @@ class SpeechSynthesizer:
     
     def is_speaking(self) -> bool:
         """Check if currently speaking"""
-        return self.is_speaking
+        return self._speaking  # Changed from self.is_speaking to self._speaking
     
     def set_voice_speed(self, speed: float):
         """Set voice speed (0.5 to 2.0)"""
