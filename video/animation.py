@@ -229,8 +229,9 @@ class FacialAnimator:
             )
             
             if len(faces) > 0:
-                # Return the largest face
-                largest_face = max(faces, key=lambda x: x[2] * x[3])
+                # Convert numpy array to list and find largest face
+                faces_list = faces.tolist()
+                largest_face = max(faces_list, key=lambda x: x[2] * x[3])
                 return largest_face
             
             return None
